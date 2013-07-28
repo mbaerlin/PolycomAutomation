@@ -1,0 +1,9 @@
+curl --digest -u Push:Push -d "<PolycomIPPhone><Data priority="all">tel:\\8500;postd=p3095,3095</Data></PolycomIPPhone>" --header "Content-Type: application/x-com-polycom-spipx" http://10.17.220.17/push
+
+curl --digest -u Push:Push -d "<PolycomIPPhone><Data priority=\"all\">tel:\\5552112</Data></PolycomIPPhone>" --header "Content-Type: application/x-com-polycom-spipx" http://10.17.220.217/push
+
+curl --digest -u Push:Push -d $'<PolycomIPPhone><Data priority=\"Critical\">Key:Softkey1\nKey:Dialpad5\nKey:Dialpad5\nKey:Dialpad5\nKey:Dialpad1\nKey:Dialpad1\nKey:Dialpad1\nKey:Dialpad2\nKey:Softkey1\nKey:Handsfree</Data></PolycomIPPhone>' --header "Content-Type: application/x-com-polycom-spipx" 10.17.220.217/push
+
+curl --digest -u Push:Push -d $'<PolycomIPPhone><Data priority=\"Critical\">tel:\\5552112</Data></PolycomIPPhone>' --header "Content-Type: application/x-com-polycom-spipx" 10.17.220.217/push
+
+curl --digest -u Push:Push -d "<PolycomIPPhone><Data priority=\"Critical\">Key:Softkey1</Data></PolycomIPPhone>" --header "Content-Type: application/x-com-polycom-spipx" http://10.17.220.217/push
