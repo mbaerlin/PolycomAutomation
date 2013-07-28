@@ -39,7 +39,7 @@ HEADERS={"Content-Type":"application/x-com-polycom-spipx", "User-Agent":"Voice D
 PAYLOAD_A=r"<PolycomIPPhone><Data priority=\"Critical\">"
 PAYLOAD_B=r"</Data></PolycomIPPhone>"
 PAYLOAD=r"<PolycomIPPhone><Data priority=\"Critical\">tel:\\5552112</Data></PolycomIPPhone>"
-DATA=json.dumps(PAYLOAD)
+CALL,ATTENDED_XFER,UNATTENDED_XFER,BLIND_XFER,CONF,CONNECT,DISCONNECT=[0,1,2,3,4,5,6]
 
 """
 Keys for VVX400 and VVX500 series:
@@ -142,7 +142,41 @@ def disconnect(ip):
   """
   pass
 
+def constructURL(ip):
+  """
+  Given an ip address, constructs a properly formatted URL
+  """
+  return (URL_A + ip + URL_B)
+
+def constructPAYLOAD(number, transaction):
+  """
+  Given a phone number, constructs the proper payload based on transaction type
+ATTENDED_XFER,UNATTENDED_XFER,BLIND_XFER,CONFERENCE,CONNECT,DISCONNECT
+  """
+  if transaction==CALL:
+      PAYLOAD= (PAYLOAD_A + "tel:\\" + number + PAYLOAD_B)
+  elif transaction==CONNECT:
+    pass
+  elif transaction==ATTENDED_XFER:
+    pass
+  elif transaction==UNATTENDED_XFER:
+    pass
+  elif transaction==BLIND_XFER:
+    pass
+  elif transaction==CONFERENCE:
+    pass
+  elif transaction==DISCONNECT:
+    pass
+    
+  return PAYLOAD
+
+
+
 def main():
+  URL=constructURL('10.17.220.10')
+  PAYLOAD=constructPAYLOAD('5551212', CALL)
+  DATA=json.dumps(PAYLOAD)
+  
   r=requests.post(URL, auth=AUTH, verify=False, data=DATA, headers=HEADERS)
 
 if __name__=="__main__":
