@@ -148,24 +148,51 @@ def constructURL(ip):
   """
   return (URL_A + ip + URL_B)
 
-def constructPAYLOAD(number, transaction):
+def constructDialPadString(number):
+  dialPadString=""
+  for n in number:
+    dialPadString+="Key:Dialpad"+n+"\n"
+  return dialPadString
+ 
+#Assumes SoftKey1 connects; maybe pass in IP address and request type from phone
+def connect():
+  return "Key:SoftKey1\n"
+
+#Assumes SoftKey3 transfers; maybe pass in IP address and request type from phone
+def transfer(method):
+  if method=="softkey":
+    return "Key:SoftKey3\n"
+  elif method=="hardkey":
+    return "Key:Transfer\n"
+
+
+def constructPAYLOAD(transaction, number=0):
   """
   Given a phone number, constructs the proper payload based on transaction type
 ATTENDED_XFER,UNATTENDED_XFER,BLIND_XFER,CONFERENCE,CONNECT,DISCONNECT
   """
   if transaction==CALL:
-      PAYLOAD= (PAYLOAD_A + "tel:\\" + number + PAYLOAD_B)
+    #Assumes STATE==HOME
+    PAYLOAD= (PAYLOAD_A + "tel:\\" + number + PAYLOAD_B)
   elif transaction==CONNECT:
-    pass
+    #Assumes STATE==INCOMING
+    PAYLOAD= (PAYLOAD_A + connect() + PAYLOAD_B)
+ 
   elif transaction==ATTENDED_XFER:
-    pass
+    #Assumes STATE==ACTIVE
+    PAYLOAD= (PAYLOAD_A + transfer('hardkey')+ constructDialPadString(number) + PAYLOAD_B)
+
   elif transaction==UNATTENDED_XFER:
+    #Assumes STATE==ACTIVE
     pass
   elif transaction==BLIND_XFER:
+    #Assumes STATE==ACTIVE
     pass
   elif transaction==CONFERENCE:
+    #Assumes STATE==ACTIVE
     pass
   elif transaction==DISCONNECT:
+    #Assumes STATE==ACTIVE
     pass
     
   return PAYLOAD
@@ -174,7 +201,7 @@ ATTENDED_XFER,UNATTENDED_XFER,BLIND_XFER,CONFERENCE,CONNECT,DISCONNECT
 
 def main():
   URL=constructURL('10.17.220.10')
-  PAYLOAD=constructPAYLOAD('5551212', CALL)
+  PAYLOAD=constructPAYLOAD(ATTENDED_XFER, '5552112')
   DATA=json.dumps(PAYLOAD)
   
   r=requests.post(URL, auth=AUTH, verify=False, data=DATA, headers=HEADERS)
