@@ -12,3 +12,7 @@ curl --digest -u Push:Push -d $'<PolycomIPPhone><Data priority=\"Critical\">tel:
 
 #Answer incoming call
 curl --digest -u Push:Push -d "<PolycomIPPhone><Data priority=\"Critical\">Key:Softkey1</Data></PolycomIPPhone>" --header "Content-Type: application/x-com-polycom-spipx" http://10.17.220.217/push
+
+#Answer then transfer
+#TEST THIS TO SEE IF THE {tel://XXXX} command works
+curl --digest -u Push:Push -d $'<PolycomIPPhone><Data priority="Critical">Key:Softkey1\nKey:Softkey3\nKey:Dialpad8\nKey:Dialpad5\nKey:Dialpad0\nKey:Dialpad0\nKey:Softkey1\nKey:Handsfree</Data></PolycomIPPhone>' --header "Content-Type: application/x-com-polycom-spipx" http://10.17.220.218/push
