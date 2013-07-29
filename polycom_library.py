@@ -25,6 +25,12 @@
 import requests
 import json
 from requests.auth import HTTPDigestAuth as digest
+from time import sleep
+from subprocess import call
+
+
+#local libraries
+#import PolycomStateMachine
 
 
 
@@ -68,6 +74,8 @@ Line20	    Line40	DialPadPound	Backspace
 
 #Define state machine transistions
 """
+POLYCOM DEFINES THEM AS:  CallTransfer, CallConference, CallPark, CallPickup, CallHold, CallHeld, CallResume, CallWaiting, CallInfo, CallShared, CallVideo, CallDivert, CallConfHold, CallConfHeld, CallConfResume, CallRemoteActive 
+
 HOME (DEFAULT)
 RINGING
 INCOMING
@@ -93,12 +101,13 @@ def isRinging(ip):
   """
   pass
 
-def answer(ip):
+#Assumes Softkey1 connects; maybe pass in IP address and request type from phone
+def connect():
   """
   IFF isRinging(ip): answers phone
   STATE==INCOMING=>ACTIVE
   """
-  pass
+  return "Key:Handsfree"
 
 def isActive(ip):
   """
@@ -150,26 +159,23 @@ def constructURL(ip):
 
 def constructDialPadString(number):
   dialPadString=""
-  for n in number:
+  for n in str(number):
     dialPadString+="Key:Dialpad"+n+"\n"
   return dialPadString
  
-#Assumes SoftKey1 connects; maybe pass in IP address and request type from phone
-def connect():
-  return "Key:SoftKey1\n"
-
-#Assumes SoftKey3 transfers; maybe pass in IP address and request type from phone
+#Assumes Softkey3 transfers; maybe pass in IP address and request type from phone
 def transfer(method):
-  if method=="softkey":
-    return "Key:SoftKey3\n"
+  if method=="Softkey":
+    return "Key:Softkey3"
   elif method=="hardkey":
-    return "Key:Transfer\n"
+    return "Key:Transfer"
 
 
 def constructPAYLOAD(transaction, number=0):
   """
   Given a phone number, constructs the proper payload based on transaction type
-ATTENDED_XFER,UNATTENDED_XFER,BLIND_XFER,CONFERENCE,CONNECT,DISCONNECT
+  ATTENDED_XFER,UNATTENDED_XFER,BLIND_XFER,CONFERENCE,CONNECT,DISCONNECT
+  TODO: VAlidation for when a number is required
   """
   if transaction==CALL:
     #Assumes STATE==HOME
@@ -180,7 +186,7 @@ ATTENDED_XFER,UNATTENDED_XFER,BLIND_XFER,CONFERENCE,CONNECT,DISCONNECT
  
   elif transaction==ATTENDED_XFER:
     #Assumes STATE==ACTIVE
-    PAYLOAD= (PAYLOAD_A + transfer('hardkey')+ constructDialPadString(number) + PAYLOAD_B)
+    PAYLOAD= (PAYLOAD_A + transfer('Softkey') + PAYLOAD_B)
 
   elif transaction==UNATTENDED_XFER:
     #Assumes STATE==ACTIVE
@@ -200,11 +206,36 @@ ATTENDED_XFER,UNATTENDED_XFER,BLIND_XFER,CONFERENCE,CONNECT,DISCONNECT
 
 
 def main():
-  URL=constructURL('10.17.220.10')
-  PAYLOAD=constructPAYLOAD(ATTENDED_XFER, '5552112')
-  DATA=json.dumps(PAYLOAD)
   
-  r=requests.post(URL, auth=AUTH, verify=False, data=DATA, headers=HEADERS)
+  #make a phone call from 5551111 at 10.17.220.217 to 5551112 (10.17.220.218)
+  
+  call(['curl', '--digest', '-u', 'Push:Push', '-d', "<PolycomIPPhone><Data priority=\"Critical\">tel:\\5551112</Data></PolycomIPPhone>", '--header', "Content-Type: application/x-com-polycom-spipx", "http://10.17.220.217/push"])
+  sleep(2)
+  #answer phone call on 5551112, at 10.17.220.217 from 5551111, and then blind transfer (sfk1, sfk3, sfk4, sfk1) to 5552112
+  call(['curl', '--digest', '-u', 'Push:Push', '-d', '<PolycomIPPhone><Data priority=\"Critical\">Key:Softkey1\nKey:Softkey3\nKey:Softkey4\nKey:Softkey1\nKey:Dialpad5\nKey:Dialpad5\nKey:Dialpad5\nKey:Dialpad2\nKey:Dialpad1\nKey:Dialpad1\nKey:Dialpad2\nKey:Softkey1</Data></PolycomIPPhone>', '--header', 'Content-Type: application/x-com-polycom-spipx', 'http://10.17.220.218/push'])
+  
+  #Key:Dialpad5\nKey:Dialpad5\nKey:Dialpad5\nKey:Dialpad2\nKey:Dialpad1\nKey:Dialpad1\nKey:Dialpad2\n
+  #s=requests.Session()
+  #
+  #s.headers.update(HEADERS)
+
+  #URL=constructURL('10.17.220.217')
+  #PAYLOAD=constructPAYLOAD(CALL, '5551112')
+  #DATA=json.dumps(PAYLOAD)
+  #r=s.post(URL, auth=AUTH, verify=False, data=DATA)
+  #sleep(4)
+
+  #URL=constructURL('10.17.220.218')
+  #AUTH=digest(USER, PWD)
+  #PAYLOAD=constructPAYLOAD(ATTENDED_XFER)
+  #DATA=json.dumps(PAYLOAD)
+  #r=s.post(URL, auth=AUTH, verify=False, data=DATA)
+  #sleep(2)
+  #URL=constructURL('10.17.220.218')
+  #PAYLOAD=constructPAYLOAD(CALL, '5551112')
+  #DATA=json.dumps(PAYLOAD)
+  #r=s.post(URL, auth=AUTH, verify=False, data=DATA)
+  #sleep(2)
 
 if __name__=="__main__":
   main()
