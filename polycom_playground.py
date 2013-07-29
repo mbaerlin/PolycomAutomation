@@ -39,7 +39,10 @@ DATA=json.dumps(PAYLOAD)
 
 
 def main():
-  r=requests.post(URL, auth=AUTH, verify=False, data=DATA, headers=HEADERS)
+  #r=requests.post(URL, auth=AUTH, verify=False, data=DATA, headers=HEADERS)
+  r=requests.get("http://10.17.220.218/polling/callstateHandler", auth=AUTH)
+  print r
+  print r.text
 
 if __name__=="__main__":
   main()
