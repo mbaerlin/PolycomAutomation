@@ -4,10 +4,10 @@ PolycomAutomation
 Project to automate polycom phone wall and test beds
 
 Notes:
-    1.  Every call should start from the home menu
-    2.  Use a map for the softkeys so that new phones / firmware changes can be added later
-    3.  Automate the phone to accept push and log to file
-    4.  Need a state machine for soft keys
+   <ol><li>  Every call should start from the home menu
+   <li>  Use a map for the softkeys so that new phones / firmware changes can be added later
+   <li>  Automate the phone to accept push and log to file
+  <li>  Need a state machine for soft keys
 
 Found that I need to construct the authorization header each time or else it did not respond to the 401
 Tried using session, but it did not work, still need to construct the AUTH each time
